@@ -30,7 +30,7 @@ function useLocalStorage(key, initialValue) {
 }
 
 function App() {
-  const [id, setId] = useState(20100);
+  const [id, setId] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState();
   const [favorites, setFavorites] = useLocalStorage('favorites', []);
   const [reviews, setReviews] = useState([]);
@@ -40,8 +40,12 @@ function App() {
   const [related, setRelated] = useState([]);
   const [questionsArray, setQuestionArray] = useState([]);
 
+  const PRODUCTS_API = 'http://3.138.137.215';
+  const REVIEWS_API = 'http://34.217.78.107';
+  const QANDA_API = 'http://3.15.4.220';
+
   async function getProduct() {
-    let product = await fetch(`/products/${id}`);
+    let product = await fetch(`${PRODUCTS_API}/products/${id}`);
     product = await product.json();
     const thisProduct = {
       id: product.id,
@@ -68,7 +72,7 @@ function App() {
   };
 
   async function getStyles() {
-    let response = await fetch(`/products/${id}/styles`);
+    let response = await fetch(`${PRODUCTS_API}/products/${id}/styles`);
     response = await response.json();
     const styles = [];
     response.results.forEach(async (style) => {
@@ -89,7 +93,7 @@ function App() {
   }
 
   const getReviews = async () => {
-    let response = await fetch(`/reviews?product_id=${id}&sort=relevant&count=1000`);
+    let response = await fetch(`${REVIEWS_API}/reviews?product_id=${id}&sort=relevant&count=1000`);
     response = await response.json();
     return response.results;
   };
@@ -111,7 +115,7 @@ function App() {
   };
 
   const getRatings = async (fetchProduct) => {
-    let rating = await fetch(`/reviews/meta?product_id=${id}`);
+    let rating = await fetch(`${REVIEWS_API}/reviews/meta?product_id=${id}`);
     rating = await rating.json();
     setReviewMeta(rating);
     rating = calculateRating(rating, fetchProduct);
@@ -122,14 +126,14 @@ function App() {
   };
 
   const getRelatedStyles = async (item, id) => {
-    let style = await fetch(`/products/${id}/styles`);
+    let style = await fetch(`${PRODUCTS_API}/products/${id}/styles`);
     style = await style.json();
     item.sale = style.results[0].sale_price;
     item.image = style.results[0].photos[0].url || null;
   };
 
   const getRelatedRating = async (item, id) => {
-    let rating = await fetch(`/reviews/meta/?product_id=${id}`);
+    let rating = await fetch(`${REVIEWS_API}/reviews/meta/?product_id=${id}`);
     rating = await rating.json();
     rating = calculateRating(rating);
     item.rating = {
@@ -139,10 +143,10 @@ function App() {
   };
 
   const getRelated = async () => {
-    let response = await fetch(`/products/${id}/related`);
+    let response = await fetch(`${PRODUCTS_API}/products/${id}/related`);
     response = await response.json();
     const result = response.map(async (eachId, index) => {
-      let item = await fetch(`/products/${eachId}`);
+      let item = await fetch(`${PRODUCTS_API}/products/${eachId}`);
       item = await item.json();
       item.index = index;
       const styles = getRelatedStyles(item, eachId);
@@ -155,7 +159,7 @@ function App() {
   };
 
   const getQuestions = async () => {
-    let results = await fetch(`/qa/questions?product_id=${id}&count=100`);
+    let results = await fetch(`${QANDA_API}/qa/questions?product_id=${id}&count=100`);
     results = await results.json();
     // return results;
     setQuestionArray(results.results);
